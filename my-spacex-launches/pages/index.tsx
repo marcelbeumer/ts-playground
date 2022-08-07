@@ -1,27 +1,12 @@
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import type { NextPage } from "next";
 import Head from "next/head";
+import { GetLaunchesQuery, Launch } from "../graphql/generated";
+import { isNotNull, isNotUndefined } from "../lib/type-helpers";
 import styles from "../styles/Home.module.css";
 
-type SpacexLaunch = {
-  id: string;
-  mission_name: string;
-  launch_date_local: string;
-  launch_site: {
-    site_name_long: string;
-  };
-  links: {
-    article_link: string;
-    video_link: string;
-    mission_path: string;
-  };
-  rocket: {
-    rocket_name: string;
-  };
-};
-
 type HomeProps = {
-  launches: SpacexLaunch[];
+  launches: Launch[];
 };
 
 type StaticHomeProps = {
@@ -33,8 +18,7 @@ export async function getStaticProps(): Promise<StaticHomeProps> {
     uri: "https://api.spacex.land/graphql/",
     cache: new InMemoryCache(),
   });
-  type Query = { launches: SpacexLaunch[] };
-  const { data } = await client.query<Query>({
+  const { data } = await client.query<GetLaunchesQuery>({
     query: gql`
       query GetLaunches {
         launches(limit: 10) {
@@ -56,7 +40,9 @@ export async function getStaticProps(): Promise<StaticHomeProps> {
       }
     `,
   });
-  return { props: data };
+  const launches: Launch[] =
+    data.launches?.filter(isNotUndefined).filter(isNotNull) ?? [];
+  return { props: { launches } };
 }
 
 const Home: NextPage<HomeProps> = (props) => {
@@ -72,11 +58,11 @@ const Home: NextPage<HomeProps> = (props) => {
         <h1 className={styles.title}>SpaceX launches GraphQL test</h1>
 
         <div className={styles.grid}>
-          {props.launches.map((launch) => {
+          {props.launches?.map((launch) => {
             return (
               <a
                 key={launch.id}
-                href={launch.links.video_link}
+                href={launch.links?.video_link ?? ""}
                 className={styles.card}
               >
                 <h3>{launch.mission_name}</h3>

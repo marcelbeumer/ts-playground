@@ -1,0 +1,11 @@
+overwrite: true
+schema: "https://api.spacex.land/graphql/"
+documents: "./pages/**/*.tsx"
+generates:
+  ./graphql/generated.ts:
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-query
+    config:
+      fetcher: fetch
