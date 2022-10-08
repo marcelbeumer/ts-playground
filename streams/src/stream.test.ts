@@ -153,7 +153,43 @@ describe("node read stream", () => {
   test.todo("automatically handle errors with for-await");
   test.todo("automatically handle errors with finished");
   test.todo("automatically handle errors with pipeline");
-  test.todo("can push its data asynchronously");
+
+  test("can push and error asynchronously", async () => {
+    let counter = 0;
+    const readable = new Readable({
+      read() {
+        counter++;
+        switch (counter) {
+          case 2:
+            setTimeout(() => {
+              this.emit("error", new Error("Test error"));
+            }, 0);
+            break;
+          default:
+            const c = counter;
+            setTimeout(() => {
+              this.push(String(c));
+            }, 0);
+        }
+      },
+    });
+
+    const chunkMock = jest.fn();
+    const errMock = jest.fn();
+
+    try {
+      for await (const chunk of readable) {
+        chunkMock(String(chunk));
+      }
+    } catch (err) {
+      errMock(String(err));
+    }
+
+    expect(chunkMock).toHaveBeenCalledTimes(1);
+    expect(errMock).toHaveBeenCalledTimes(1);
+    expect(errMock).toHaveBeenCalledWith("Error: Test error");
+  });
+
   test.todo("can error asynchronously");
 });
 
