@@ -61,7 +61,7 @@ describe("node read stream", () => {
     const readable = createSimpleReadable({ dataSize: 10, chunkSize: 5 });
     const data: string[] = [];
     const writable = new Writable({
-      write: (chunk, enc, cb) => {
+      write: (chunk, _enc, cb) => {
         data.push(String(chunk));
         cb(null);
       },
@@ -75,7 +75,7 @@ describe("node read stream", () => {
   test("read using a transform stream", async () => {
     const readable = createSimpleReadable({ dataSize: 10, chunkSize: 5 });
     const transform = new Transform({
-      transform(chunk, enc, callback) {
+      transform(chunk, _enc, callback) {
         callback(null, String(chunk));
       },
     });
