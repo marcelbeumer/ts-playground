@@ -18,7 +18,7 @@ function createSimpleReadable(opts: {
 }
 
 describe("node read stream", () => {
-  test("read all at once", async () => {
+  test("read all at once", () => {
     const readable = createSimpleReadable({ dataSize: 10, chunkSize: 10 });
     expect(String(readable.read())).toEqual("0123456789");
   });
@@ -35,7 +35,21 @@ describe("node read stream", () => {
     expect(mock).toHaveBeenNthCalledWith(2, "56789");
   });
 
-  test.todo("read using multiple read calls");
+  test("read using multiple read calls", () => {
+    const readable = createSimpleReadable({ dataSize: 10, chunkSize: 5 });
+    const mock = jest.fn();
+
+    // officially better to wait for "readable"
+    let chunk: unknown;
+    while ((chunk = readable.read()) !== null) {
+      mock(String(chunk));
+    }
+
+    expect(mock).toHaveBeenCalledTimes(2);
+    expect(mock).toHaveBeenNthCalledWith(1, "01234");
+    expect(mock).toHaveBeenNthCalledWith(2, "56789");
+  });
+
   test.todo("read using a write stream");
   test.todo("error handling with error event");
   test.todo("automatically handle errors with for-await");
