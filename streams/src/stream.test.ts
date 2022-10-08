@@ -189,8 +189,6 @@ describe("node read stream", () => {
     expect(errMock).toHaveBeenCalledTimes(1);
     expect(errMock).toHaveBeenCalledWith("Error: Test error");
   });
-
-  test.todo("can error asynchronously");
 });
 
 describe("node write stream", () => {
